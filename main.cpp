@@ -34,6 +34,7 @@ using namespace std;
 int main()
 {
     string fileName;
+	//bool acertou;
     bool repeat;
     ifstream myNet;
     bool linear = true;
