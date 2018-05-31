@@ -137,6 +137,14 @@ class Factory
         {
             return metodo;
         }
+        /**
+        * Retorna o valor de teta.
+        Ex(teta = 0.5 é Metodo trapézio)
+        */
+        double getTeta()
+        {
+            return teta;
+        }
 
         /**
          * Retorna o instante de tempo
@@ -232,6 +240,18 @@ class Factory
             tempo = t;
         }
 
+        void setTeta(double v)
+        {
+          /** evitando ter um valor de
+          * teta muito proximo de 1, pois pode gerar erro
+          */
+            if (v < 0.001){
+              teta = 0.001;
+            }else{
+              teta = v;
+            }
+        }
+
         /**
          * Verifica se o metodo de analise e trapezio
          */
@@ -262,6 +282,13 @@ class Factory
         }
 
     private:
+
+        /**
+        * valor do metodo teta da analise
+        */
+
+        double teta;
+
         /**
          * Tempo final a ser analisado
          */
@@ -314,7 +341,8 @@ class Factory
                     element[0],
                     stoi(element[1]),
                     stoi(element[2]),
-                    stod(element[3])
+                    stod(element[3]),
+                    teta
                 );
                 component->setPasso(getPasso());
                 if (getTempo() == 0) { //Define o passo a ser utilizado no instante 0 do capacitor
@@ -326,7 +354,8 @@ class Factory
                     element[0],
                     stoi(element[1]),
                     stoi(element[2]),
-                    stod(element[3])
+                    stod(element[3]),
+                    teta
                 );
                 component->setPasso(getPasso());
                 if (getTempo() == 0) { //Define o passo a ser utilizado no instante 0 do capacitor

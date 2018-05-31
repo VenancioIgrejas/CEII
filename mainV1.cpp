@@ -34,7 +34,8 @@ int main(){
 
 	components->setTempoFinal(10);
 	components->setPasso(1);
-
+	components->setTeta(0.5);
+	
 	components -> setup(elementsList-> getElements());
 	vector<string> nodes;
 	nodes = components -> getAllNodes();

@@ -14,7 +14,7 @@ class Indutor : public Components
         /**
          * Construtor
          */
-        Indutor(string n, int a, int b, double v) : Components(n, a, b)
+        Indutor(string n, int a, int b, double v,double o) : Components(n, a, b)
         {
             setIndutancia(v);
         }
@@ -43,6 +43,31 @@ class Indutor : public Components
         void setCorrente(double v)
         {
             corrente = v;
+        }
+
+        /**
+        * Retorna o valor de teta.
+        Ex(teta = 0.5 é Metodo trapézio)
+        */
+        double getTeta()
+        {
+            return teta;
+        }
+
+        /**
+         * Define a corrent no indutor
+         * @param v valor da corrente
+         */
+        void setTeta(double o)
+        {
+          /** evitando ter um valor de
+          * teta muito proximo de 1, pois pode gerar erro
+          */
+            if (o < 0.001){
+              teta = 0.001;
+            }else{
+              teta = o;
+            }
         }
 
         /**
@@ -121,8 +146,8 @@ class Indutor : public Components
 
                 corrente = resultado[pos];
 
-                condutancia[pos][pos] += (2 * getIndutancia()) / passo;
-                correntes[pos] += (((2 * getIndutancia()) / passo) * corrente) + tensaoRamo;
+                condutancia[pos][pos] += getIndutancia() / (teta*passo);
+                correntes[pos] += ((getIndutancia() / (teta*passo)) * corrente) + (1/teta - 1)*tensaoRamo;
             } else {
                 condutancia[getNoA()][getNoA()] += 10e9;
                 condutancia[getNoB()][getNoB()] += 10e9;
@@ -146,6 +171,8 @@ class Indutor : public Components
          * valor da indutancia do capacitor
          */
         double indutancia;
+
+        double teta;
 };
 
 #endif
