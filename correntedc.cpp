@@ -28,10 +28,12 @@ class CorrenteDC : public Dc
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
-            correntes[getNoA()] += -1*getValor();
-            correntes[getNoB()] += getValor();
+            correntes[L[getNoA()]] += -1*getValor();
+            correntes[L[getNoB()]] += getValor();
         }
 };
 

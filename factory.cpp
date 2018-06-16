@@ -96,6 +96,7 @@ class Factory
         Factory(double t)
         {
             setTempo(t);
+
         }
 
         /**
@@ -136,14 +137,6 @@ class Factory
         string getMetodo()
         {
             return metodo;
-        }
-        /**
-        * Retorna o valor de teta.
-        Ex(teta = 0.5 Ã© Metodo trapÃ©zio)
-        */
-        double getTeta()
-        {
-            return teta;
         }
 
         /**
@@ -201,6 +194,24 @@ class Factory
         }
 
         /**
+         * Determina o numero de equações
+         */
+         int getNumEq() {
+            string type;
+            int total = getNodesSize() -1;
+            for (int i = 0 ; i < componentes.size(); i++ ) {
+                type = componentes[i]->getNome().substr(0,1);
+                if (type == "O") {
+                   total--;
+                }
+                if (type == "L") {
+                    total++;
+                }
+            }
+            return total;
+         }
+
+        /**
          * Define o passo
          */
         void setPasso(double v)
@@ -240,16 +251,19 @@ class Factory
             tempo = t;
         }
 
-        void setTeta(double v)
-        {
-          /** evitando ter um valor de
-          * teta muito proximo de 1, pois pode gerar erro
-          */
-            if (v < 0.001){
-              teta = 0.001;
-            }else{
-              teta = v;
-            }
+        vector <int> getL() {
+           return L;
+        }
+        vector <int> getC() {
+           return C;
+        }
+        void setLC(int num) {
+           L.resize(num + 1);
+           C.resize(num + 1);
+           for (int i =0; i<(num + 1); i++) {
+              L[i] = i;
+              C[i] = i;
+           }
         }
 
         /**
@@ -281,14 +295,108 @@ class Factory
             reverse(componentes.begin(), componentes.end());
         }
 
-    private:
-
         /**
-        * valor do metodo teta da analise
-        */
+         * Função que inicializa os arrays L e C e solicita sua configuração
+         */
+         void operacional(int num_Nos) {
+            setLC(num_Nos);
+            vector <string> all_nodes = getAllNodes();
+            string type;
 
-        double teta;
+            for (int i = 0 ; i < componentes.size(); i++ ) {
+                type = componentes[i]->getNome().substr(0,1);
 
+                if (type == "V") {
+                   vector<string>::iterator it;
+                   it = find(all_nodes.begin(), all_nodes.end(), componentes[i]->getAuxNode());
+                   auto pos = it - all_nodes.begin();
+                   //cout << "aki8, aux: " << pos << endl;
+                   somar (L, componentes[i]->getNoA(), componentes[i]->getNoB());
+                   somar (C, 0, pos);
+                   //cout << "aki9" << endl;
+                   //cout << "L: ";
+                   //for (int i = 0; i <9; i++) {
+                   // cout << L[i] << " - ";
+                   //}
+                   //cout << "\nC: ";
+                   //for (int i = 0; i <9; i++) {
+                   // cout << C[i] << " - ";
+                  // }
+                }
+                else if (type == "O") {
+                   somar (L, componentes[i]->getNoA(), componentes[i]->getNoB());
+                   somar (C, componentes[i]->getNoC(), componentes[i]->getNoD());
+                }
+                else if (type == "E") {
+                   vector<string>::iterator it;
+                   it = find(all_nodes.begin(), all_nodes.end(), componentes[i]->getAuxNode());
+                   auto pos = it - all_nodes.begin();
+                   somar(L, componentes[i]->getNoA(), componentes[i]->getNoB());
+                   somar(C, 0, pos);
+                }
+                else if (type == "F") {
+                   vector<string>::iterator it;
+                   it = find(all_nodes.begin(), all_nodes.end(), componentes[i]->getAuxNode());
+                   auto pos = it - all_nodes.begin();
+                   somar(L, pos, 0);
+                   somar(C, componentes[i]->getNoC(), componentes[i]->getNoD());
+                }
+                else if (type == "H") {
+                   vector<string>::iterator it;
+                   vector<string>::iterator it2;
+                   it = find(all_nodes.begin(), all_nodes.end(), componentes[i]->getAuxNode());
+                   it2 = find(all_nodes.begin(), all_nodes.end(), componentes[i]->getAuxNode2());
+                   auto pos = it - all_nodes.begin();
+                   auto pos2 = it2 - all_nodes.begin();
+                   //cout << "aki1, aux1 = " << pos << endl;
+                   //cout << "aux2 = " << pos2 << endl;
+                   //for (int i = 0; i <9; i++) {
+                   // cout << L[i] << " - ";
+                   //}
+                   //cout << "\nC: ";
+                   //for (int i = 0; i <9; i++) {
+                   // cout << C[i] << " - ";
+                   //}
+
+                   somar(L, componentes[i]->getNoA(), componentes[i]->getNoB());
+                   //cout << "\naki2" << endl;
+                   //for (int i = 0; i <9; i++) {
+                   // cout << L[i] << " - ";
+                  // }
+                  // cout << "\nC: ";
+                  // for (int i = 0; i <9; i++) {
+                  //  cout << C[i] << " - ";
+                  // }
+                   somar(C, 0, pos2);
+                  // cout << "aki3, aux1 = " << pos << endl;
+                  // for (int i = 0; i <9; i++) {
+                  //  cout << L[i] << " - ";
+                  // }
+                  // cout << "\nC: ";
+                  // for (int i = 0; i <9; i++) {
+                  //  cout << C[i] << " - ";
+                  // }
+                  // cout << "aki4" << endl;
+                   somar(L, pos, 0);
+                 //  cout << "aki5" << endl;
+                   somar(C, componentes[i]->getNoC(), componentes[i]->getNoD());
+                 //  cout << "aki6" << endl;
+                 //  cout << "\nAPOS TC : " << endl;
+                 //  cout << "aki7, aux1 = " << pos << endl;
+                 //  for (int i = 0; i <9; i++) {
+                 //   cout << L[i] << " - ";
+                 //  }
+                 //  cout << "\nC: ";
+                 //  for (int i = 0; i <9; i++) {
+                 //   cout << C[i] << " - ";
+                 //  }
+                }
+
+            }
+
+         }
+
+    private:
         /**
          * Tempo final a ser analisado
          */
@@ -323,6 +431,12 @@ class Factory
         vector<Components*> componentes;
 
         /**
+         *arrays de redirecionamento para redução em Amp Op
+         */
+        vector <int> C;
+        vector <int> L;
+
+        /**
          * Constroi instancia para cada componente
          * de acordo com a primeira letra encontrada na netlist
          */
@@ -341,8 +455,7 @@ class Factory
                     element[0],
                     stoi(element[1]),
                     stoi(element[2]),
-                    stod(element[3]),
-                    teta
+                    stod(element[3])
                 );
                 component->setPasso(getPasso());
                 if (getTempo() == 0) { //Define o passo a ser utilizado no instante 0 do capacitor
@@ -354,8 +467,7 @@ class Factory
                     element[0],
                     stoi(element[1]),
                     stoi(element[2]),
-                    stod(element[3]),
-                    teta
+                    stod(element[3])
                 );
                 component->setPasso(getPasso());
                 if (getTempo() == 0) { //Define o passo a ser utilizado no instante 0 do capacitor
@@ -416,7 +528,7 @@ class Factory
                     stoi(element[4])
                 );
                 componentes.push_back(component);
-                auxNodes.push_back("j" + component->getNome()); // Adiciona o no auxiliar de acordo com a estampa
+                //auxNodes.push_back("j" + component->getNome()); // Adiciona o no auxiliar de acordo com a estampa
             } else if (type == "N") {
                 ResistorNLinear *component = new ResistorNLinear( // Constroi um resistor nao linear
                     element[0],
@@ -559,6 +671,26 @@ class Factory
             } else if (type == "*"){
                 //comentario so ignorar
             }
+        }
+
+        /**
+         * Função que configura os arrays de direcionamento
+         */
+        void somar(vector <int> &Q, int a, int b) {
+           int i,a1,b1;
+           cout << "\nNoA: " << a << endl;
+           cout << "NoB: " << b << endl;
+           vector<string> allNodes = this->getAllNodes();
+           int numNodes = allNodes.size() + 1;
+           cout << numNodes << endl;
+
+           if (Q[a]>Q[b]) {a1=Q[b]; b1=Q[a];}
+           else {a1=Q[a]; b1=Q[b];}
+           if (a1==b1) {throw invalid_argument("Circuito Invalido!");}
+           for (i=1; i<=numNodes; i++) {
+              if (Q[i]==b1) Q[i]=a1;
+              if (Q[i]>b1) Q[i]--;
+           }
         }
 };
 

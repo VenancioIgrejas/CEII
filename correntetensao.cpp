@@ -27,12 +27,14 @@ class CorrenteTensao : public FontesControladas
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
-            condutancia[getNoA()][getNoC()] += getGanho();
-            condutancia[getNoA()][getNoD()] += -1*getGanho();
-            condutancia[getNoB()][getNoC()] += -1*getGanho();
-            condutancia[getNoB()][getNoD()] += getGanho();
+            condutancia[L[getNoA()]][C[getNoC()]] += getGanho();
+            condutancia[L[getNoA()]][C[getNoD()]] += -1*getGanho();
+            condutancia[L[getNoB()]][C[getNoC()]] += -1*getGanho();
+            condutancia[L[getNoB()]][C[getNoD()]] += getGanho();
         }
 };
 

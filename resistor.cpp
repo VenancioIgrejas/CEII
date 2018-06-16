@@ -45,12 +45,14 @@ class Resistor : public Components
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
-            condutancia[getNoA()][getNoA()] += 1/getResistencia();
-            condutancia[getNoB()][getNoB()] += 1/getResistencia();
-            condutancia[getNoA()][getNoB()] += -1/getResistencia();
-            condutancia[getNoB()][getNoA()] += -1/getResistencia();
+            condutancia[L[getNoA()]][C[getNoA()]] += 1/getResistencia();
+            condutancia[L[getNoB()]][C[getNoB()]] += 1/getResistencia();
+            condutancia[L[getNoA()]][C[getNoB()]] += -(1/getResistencia());
+            condutancia[L[getNoB()]][C[getNoA()]] += -(1/getResistencia());
         }
 
     private:

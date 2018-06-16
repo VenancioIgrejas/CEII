@@ -223,28 +223,30 @@ class ResistorNLinear : public Components
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector <int> L,
+            vector <int> C,
             vector<double> resultado)
         {
             /**
              * Pega a tensao no ramo no instante de tempo anterior
              */
-            double tensaoRamo = resultado[getNoA()] - resultado[getNoB()];
+            double tensaoRamo = resultado[C[getNoA()]] - resultado[C[getNoB()]];
             /**
              * Descarta o no Zero uma vez que ele e linearmente dependente
              */
-            if (getNoA() == 0) {
-                tensaoRamo = -1*resultado[getNoB()];
+            if (C[getNoA()] == 0) {
+                tensaoRamo = -1*resultado[C[getNoB()]];
             }
-            if (getNoB() == 0) {
-                tensaoRamo = resultado[getNoA()];
+            if (C[getNoB()] == 0) {
+                tensaoRamo = resultado[C[getNoA()]];
             }
-            condutancia[getNoA()][getNoA()] += 1/getResistencia(tensaoRamo);
-            condutancia[getNoB()][getNoB()] += 1/getResistencia(tensaoRamo);
-            condutancia[getNoA()][getNoB()] += -1/getResistencia(tensaoRamo);
-            condutancia[getNoB()][getNoA()] += -1/getResistencia(tensaoRamo);
+            condutancia[L[getNoA()]][C[getNoA()]] += 1/getResistencia(tensaoRamo);
+            condutancia[L[getNoB()]][C[getNoB()]] += 1/getResistencia(tensaoRamo);
+            condutancia[L[getNoA()]][C[getNoB()]] += -1/getResistencia(tensaoRamo);
+            condutancia[L[getNoB()]][C[getNoA()]] += -1/getResistencia(tensaoRamo);
 
-            correntes[getNoA()] += -1*getCorrente(tensaoRamo);
-            correntes[getNoB()] += getCorrente(tensaoRamo);
+            correntes[L[getNoA()]] += -1*getCorrente(tensaoRamo);
+            correntes[L[getNoB()]] += getCorrente(tensaoRamo);
         }
 
         /**

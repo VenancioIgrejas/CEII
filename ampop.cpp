@@ -23,10 +23,10 @@ class AmpOp : public Components4t
          * Retorna corrente que auxiliar
          * para analise nodal modificada
          */
-        string getAuxNode()
-        {
-            return "j" + getNome();
-        }
+        //string getAuxNode()
+        //{
+        //    return "j" + getNome();
+        //}
 
         /**
          * Estanpa da matriz nodal modificada amp op
@@ -37,16 +37,18 @@ class AmpOp : public Components4t
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
-            vector<string>::iterator it;
-            it = find(nodes.begin(), nodes.end(), getAuxNode());
-            auto pos = it - nodes.begin();
+          //  vector<string>::iterator it;
+          //  it = find(nodes.begin(), nodes.end(), getAuxNode());
+            //auto pos = it - nodes.begin();
 
-            condutancia[getNoA()][pos] += 1;
-            condutancia[getNoB()][pos] += -1;
-            condutancia[pos][getNoC()] += 1;
-            condutancia[pos][getNoD()] += -1;
+           // condutancia[getNoA()][pos] += 1;
+           // condutancia[getNoB()][pos] += -1;
+          //  condutancia[pos][getNoC()] += 1;
+         //   condutancia[pos][getNoD()] += -1;
         }
 };
 

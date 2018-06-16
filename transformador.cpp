@@ -55,6 +55,8 @@ class Transformador : public Components4t
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
             vector<string>::iterator it;

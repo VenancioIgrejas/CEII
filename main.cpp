@@ -1,4 +1,3 @@
-#define __USE_MINGW_ANSI_STDIO 0
 /**
  * Inclui:
  *  - cin
@@ -20,6 +19,7 @@
  *  - Vector
  */
 #include <vector>
+#include <iomanip>
 /**
  * Classe parceadora de Net List
  */
@@ -86,6 +86,20 @@ int main()
     nodes = components->getAllNodes();
     nos = nodes.size();
     int numeroComponentes = components->getComponents().size();
+    components->operacional(nos);
+    int neq = components->getNumEq();
+    vector <int> L = components->getL();
+    vector <int> C = components->getC();
+
+    int numEq = components->getNumEq();
+
+    cout << "\nVariaveis e apontadores:" << endl;
+    for (int i = 0; i < nos; i++) {
+        cout << i << " -> " << nodes[i] << " (L=" << L[i] << ", C=" << C[i] << ")" << endl;
+    }
+    cout << "TODOS OS NOS SAO: " << nos << endl;
+    cout << "O NUMERO DE NOS EH: " << ((components->getNodesSize())-1) << endl;
+    cout << "O NUMERO DE EQS EH: " << neq << endl;
 
     vector<Components*> listaDeComponetesAnterior(numeroComponentes);
     vector<double> resultado(nos);
@@ -94,7 +108,10 @@ int main()
     ofstream outfile ("resultados.tab");
     outfile << "t";
     for(int n = 1; n < nos; n++) {
-        outfile << " " << nodes[n];
+        if (C[n] != 0) {
+            //outfile << " " << nodes[n];
+            outfile << "  " << nodes[n];
+        }
     }
     outfile << endl;
     for (double t = components->getTempo(); t <= components->getTempoFinal() + 10e-15; t += components->getPasso()) { // 10e-15 para comparacao com double
@@ -138,10 +155,11 @@ int main()
                     components->getComponents()[i]->setCorrente(listaDeComponetesAnterior[i]->getCorrente());
                 }
             }
-            components->getComponents()[i]->estampar(condutancia, correntes, nodes, resultado);
+            components->getComponents()[i]->estampar(condutancia, correntes, nodes, L, C, resultado);
         }
+
         resultadoAnterior = resultado;
-        resultado = gauss(condutancia, correntes, components->getNodesSize());
+        resultado = gauss(condutancia, correntes, neq);
 
         /**
          * Teste de adicionar a corrente apos o calculo
@@ -153,15 +171,15 @@ int main()
                 /**
                  * Pega a tensao nodal para a matriz de resultados atuais e estampas atuais
                  */
-                double tensaoRamo = resultado[noA] - resultado[noB];
+                double tensaoRamo = resultado[C[noA]] - resultado[C[noB]];
                 /**
                  * Ignorar a tensao no no 0
                  */
                 if (noA == 0) {
-                    tensaoRamo = -1*resultado[noB];
+                    tensaoRamo = -1*resultado[C[noB]];
                 }
                 if (noB == 0) {
-                    tensaoRamo = resultado[noA];
+                    tensaoRamo = resultado[C[noA]];
                 }
                 /**
                  * Pega a corrente passando no resistor no instante de tempo atual
@@ -189,7 +207,7 @@ int main()
                         components->getComponents()[i]->getNome().substr(0,1) == "N") {
                         /*Desestampa e reestampa componentes nao lineares*/
                         components->getComponents()[i]->desestampar(condutancia, correntes, resultadoAnterior);
-                        components->getComponents()[i]->estampar(condutancia, correntes, nodes, resultado);
+                        components->getComponents()[i]->estampar(condutancia, correntes, nodes, L, C, resultado);
                     }
                 }
                 resultadoAnterior = resultado;
@@ -209,7 +227,8 @@ int main()
 
         outfile << t;
         for(int x = 1; x < (int) resultado.size(); x++) {
-            outfile << " " << resultado[x];
+            //outfile << " " << resultado[x];
+            outfile << "  " << resultado[x];
         }
         outfile << endl;
     }

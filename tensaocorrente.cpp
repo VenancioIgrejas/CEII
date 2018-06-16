@@ -46,6 +46,8 @@ class TensaoCorrente : public FontesControladas
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
             vector<string>::iterator it;
@@ -56,15 +58,30 @@ class TensaoCorrente : public FontesControladas
             auto pos = it - nodes.begin();
             auto pos2 = it2 - nodes.begin();
 
-            condutancia[getNoA()][pos2] += 1;
-            condutancia[getNoB()][pos2] += -1;
-            condutancia[getNoC()][pos] += 1;
-            condutancia[getNoD()][pos] += -1;
-            condutancia[pos][getNoC()] += -1;
-            condutancia[pos][getNoD()] += 1;
-            condutancia[pos2][getNoA()] += -1;
-            condutancia[pos2][getNoB()] += 1;
-            condutancia[pos2][pos] += getGanho();
+            condutancia[L[0]][C[getNoA()]] += 1;
+            condutancia[L[pos2]][C[getNoB()]] += 1;
+            condutancia[L[0]][C[getNoB()]] += -1;
+            condutancia[L[pos2]][C[getNoA()]] += -1;
+
+            condutancia[L[pos2]][C[pos]] += getGanho();
+            condutancia[L[0]][C[0]] += getGanho();
+            condutancia[L[pos2]][C[0]] += -1*getGanho();
+            condutancia[L[0]][C[pos]] += -1*getGanho();
+
+            condutancia[L[getNoC()]][C[pos]] += 1;
+            condutancia[L[getNoD()]][C[0]] += 1;
+            condutancia[L[getNoC()]][C[0]] += -1;
+            condutancia[L[getNoD()]][C[pos]] += -1;
+
+            //condutancia[getNoA()][pos2] += 1;
+            //condutancia[getNoB()][pos2] += -1;
+            //condutancia[getNoC()][pos] += 1;
+            //condutancia[getNoD()][pos] += -1;
+            //condutancia[pos][getNoC()] += -1;
+            //condutancia[pos][getNoD()] += 1;
+            //condutancia[pos2][getNoA()] += -1;
+            //condutancia[pos2][getNoB()] += 1;
+            //condutancia[pos2][pos] += getGanho();
         }
 };
 
