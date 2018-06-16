@@ -204,7 +204,8 @@ int main()
             for (int n = 1; n <= 20; n++) {
                 for (int i = 0; i < numeroComponentes; i++) {
                     if (components->getComponents()[i]->getNome().substr(0,1) == "$" ||
-                        components->getComponents()[i]->getNome().substr(0,1) == "N") {
+                        components->getComponents()[i]->getNome().substr(0,1) == "N" ||
+                        components->getComponents()[i]->getNome().substr(0,1) == "D" ){
                         /*Desestampa e reestampa componentes nao lineares*/
                         components->getComponents()[i]->desestampar(condutancia, correntes, resultadoAnterior);
                         components->getComponents()[i]->estampar(condutancia, correntes, nodes, L, C, resultado);

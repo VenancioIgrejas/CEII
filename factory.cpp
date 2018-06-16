@@ -83,6 +83,10 @@
  * Modelo de fonte de tensao pulsada
  */
 #include "tensaopulso.cpp"
+/**
+ * Modelo do diodo usando Newton-Raphson
+ */
+#include "diodo.cpp"
 
 /* Necessario para nao precisar escrever std:: */
 using namespace std;
@@ -140,6 +144,12 @@ class Factory
         }
 
         /**
+        * Retorna o valor de teta
+        */
+        double getTeta(){
+          return teta;
+        }
+        /**
          * Retorna o instante de tempo
          */
         double getTempo()
@@ -194,7 +204,7 @@ class Factory
         }
 
         /**
-         * Determina o numero de equações
+         * Determina o numero de equaï¿½ï¿½es
          */
          int getNumEq() {
             string type;
@@ -217,6 +227,10 @@ class Factory
         void setPasso(double v)
         {
             passo = v;
+        }
+
+        void setTeta(double v){
+          teta = v;
         }
 
         /**
@@ -269,9 +283,9 @@ class Factory
         /**
          * Verifica se o metodo de analise e trapezio
          */
-        bool isTrapezio()
+        bool isTeta()
         {
-            return getMetodo() == "TRAP";
+            return getMetodo() == "TETA";
         }
 
         /**
@@ -296,7 +310,7 @@ class Factory
         }
 
         /**
-         * Função que inicializa os arrays L e C e solicita sua configuração
+         * Funï¿½ï¿½o que inicializa os arrays L e C e solicita sua configuraï¿½ï¿½o
          */
          void operacional(int num_Nos) {
             setLC(num_Nos);
@@ -414,8 +428,12 @@ class Factory
          */
         string metodo;
         /**
-         * Instante de tempo a ser analisado
+         * valor do TETA
          */
+        double teta;
+         /**
+          * Instante de tempo a ser analisado
+          */
         double tempo;
         /**
          * numero de nos de tensao
@@ -431,7 +449,7 @@ class Factory
         vector<Components*> componentes;
 
         /**
-         *arrays de redirecionamento para redução em Amp Op
+         *arrays de redirecionamento para reduï¿½ï¿½o em Amp Op
          */
         vector <int> C;
         vector <int> L;
@@ -529,6 +547,15 @@ class Factory
                 );
                 componentes.push_back(component);
                 //auxNodes.push_back("j" + component->getNome()); // Adiciona o no auxiliar de acordo com a estampa
+            } else if (type == "D") {
+                Diodo *component = new Diodo(
+                    element[0],
+                    stoi(element[1]),
+                    stoi(element[2]),
+                    stoi(element[3]),
+                    stoi(element[4])
+                );
+                componentes.push_back(component);
             } else if (type == "N") {
                 ResistorNLinear *component = new ResistorNLinear( // Constroi um resistor nao linear
                     element[0],
@@ -663,10 +690,11 @@ class Factory
                 setTempoFinal(stod(element[1]));
                 setPasso(stod(element[2]));
                 setMetodo(element[3]);
-                setPassoPonto(stod(element[4]));
+                setTeta(stod(element[4]));
+                setPassoPonto(stod(element[5]));
                 //@todo melhorar a excecao
-                if (! isTrapezio()) {
-                    throw invalid_argument("So faz analise por trapezio, sry");
+                if (! isTeta()) {
+                    throw invalid_argument("So faz analise Teta, sry");
                 }
             } else if (type == "*"){
                 //comentario so ignorar
@@ -674,7 +702,7 @@ class Factory
         }
 
         /**
-         * Função que configura os arrays de direcionamento
+         * Funï¿½ï¿½o que configura os arrays de direcionamento
          */
         void somar(vector <int> &Q, int a, int b) {
            int i,a1,b1;
