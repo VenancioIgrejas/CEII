@@ -28,6 +28,12 @@ class Capacitor : public Components
             passo = p;
         }
 
+        void setTeta(double t)
+        {
+          if (t==0){teta = 0.0001;}
+          else{teta = t;}
+        }
+
         /**
          * Retorna a corrente do  capacitor
          */
@@ -51,6 +57,11 @@ class Capacitor : public Components
         double getCorrente()
         {
             return corrente;
+        }
+
+        double getTeta()
+        {
+          return teta;
         }
 
         /**
@@ -103,19 +114,19 @@ class Capacitor : public Components
                     tensaoRamo = resultado[C[getNoA()]];
                 }
 
-                condutancia[L[getNoA()]][C[getNoA()]] += (2 * getCapacitancia())/passo;
-                condutancia[L[getNoB()]][C[getNoB()]] += (2 * getCapacitancia())/passo;
-                condutancia[L[getNoA()]][C[getNoB()]] += (-2 * getCapacitancia())/passo;
-                condutancia[L[getNoB()]][C[getNoA()]] += (-2 * getCapacitancia())/passo;
+                condutancia[L[getNoA()]][C[getNoA()]] += getCapacitancia()/(passo*getTeta());
+                condutancia[L[getNoB()]][C[getNoB()]] += getCapacitancia()/(passo*getTeta());
+                condutancia[L[getNoA()]][C[getNoB()]] += (-1 * getCapacitancia())/(passo*getTeta());
+                condutancia[L[getNoB()]][C[getNoA()]] += (-1 * getCapacitancia())/(passo*getTeta());
 
-                correntes[L[getNoA()]] += (((2 * getCapacitancia())/passo) * tensaoRamo) + getCorrente(); /*getCorrente vale j no instante anterior*/
+                correntes[L[getNoA()]] += ((getCapacitancia()/(passo*getTeta())) * tensaoRamo) + ((1-getTeta())/getTeta())*getCorrente(); /*getCorrente vale j no instante anterior*/
                 correntes[L[getNoB()]] += (((-2 * getCapacitancia())/passo) * tensaoRamo) - getCorrente(); /*getCorrente vale j no instante anterior*/
                 /**
                  * Define a nova corrente usando tensao no instante e a corrente no instante anterior
                  * esse nova corrente agora passa a ser a corrente na fonte de corrente para o instante
                  * atual
                  */
-                setCorrente((((2 * getCapacitancia())/passo) * tensaoRamo) + getCorrente());
+                setCorrente(((getCapacitancia()/(passo*getTeta())) * tensaoRamo) + ((1-getTeta())/getTeta())*getCorrente());
             } else {
                 condutancia[L[getNoA()]][C[getNoA()]] += 10e9;//10e-9;
                 condutancia[L[getNoB()]][C[getNoB()]] += 10e9;//10e-9;
@@ -140,6 +151,8 @@ class Capacitor : public Components
          * valor da capacitancia do capacitor
          */
         double capacitancia;
+
+        double teta;
 };
 
 #endif

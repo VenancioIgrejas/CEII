@@ -113,6 +113,7 @@ class Components
          * o metodo nao pode ser utilizado no vetor de componentes
          */
         void virtual setCorrente(double v) {};
+        void virtual setTeta(double t) {};
         double virtual getCorrente() {return 0;};
         double virtual getCapacitancia() {return 0;};
 

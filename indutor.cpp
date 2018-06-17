@@ -46,12 +46,28 @@ class Indutor : public Components
         }
 
         /**
+        * define o valor do teta
+        */
+
+        void setTeta(double t)
+        {
+          if (t==0){teta = 0.0001;}
+          else{teta = t;}
+
+        }
+
+        /**
          * Retorna a corrente do indutor
          */
         double getCorrente()
         {
 
             return corrente;
+        }
+
+        double getTeta()
+        {
+          return teta;
         }
 
         /**
@@ -123,8 +139,8 @@ class Indutor : public Components
 
                 corrente = resultado[C[pos]];
 
-                condutancia[L[pos]][C[pos]] += (2 * getIndutancia()) / passo;
-                correntes[L[pos]] += (((2 * getIndutancia()) / passo) * corrente) + tensaoRamo;
+                condutancia[L[pos]][C[pos]] += getIndutancia() / (getTeta()*passo);
+                correntes[L[pos]] += (( getIndutancia() / (passo*getTeta())) * corrente) + (1/getTeta()-1)*tensaoRamo;
             } else {
                 condutancia[L[pos]][C[pos]] += 10e9; //No passo zero, considerar condutancia alta
                 //condutancia[L[getNoA()]][C[getNoA()]] += 10e9;
@@ -149,6 +165,11 @@ class Indutor : public Components
          * valor da indutancia do capacitor
          */
         double indutancia;
+
+        /**
+        * valor do teta para analise
+        */
+        double teta;
 };
 
 #endif

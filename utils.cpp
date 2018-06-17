@@ -69,14 +69,14 @@ vector<double> gauss(vector<vector<double> > condutancia, vector<double> corrent
     int i,j,l, a;
     double t, p;
 
-    /*cout << "\nA MATRIZ NO INICIO EH: " << endl;
-    for (int l = 1; l <= neq; l++) {
-        for (c = 1; c <= neq+1; c++) {
-            cout << Yn[l][c] << " ";
-        }
-        cout << "\n";
-    }
-    cout << "\n" << endl;*/
+    // cout << "\nA MATRIZ NO INICIO EH: " << endl;
+    // for (int l = 1; l <= neq; l++) {
+    //     for (c = 1; c <= neq+1; c++) {
+    //         cout << Yn[l][c] << " ";
+    //     }
+    //     cout << "\n";
+    // }
+    // cout << "\n" << endl;
 
     for (i=1; i<=neq; i++) {
         t=0.0;
@@ -110,14 +110,14 @@ vector<double> gauss(vector<vector<double> > condutancia, vector<double> corrent
             }
         }
 
-        /*cout << "\nA MATRIZ NO FIM EH: " << endl;
-        for (int l = 1; l <= neq; l++) {
-            for (c = 1; c <= neq+1; c++) {
-                cout << Yn[l][c] << " ";
-            }
-            cout << "\n";
-        }
-        cout << "\n" << endl;*/
+        // cout << "\nA MATRIZ NO FIM EH: " << endl;
+        // for (int l = 1; l <= neq; l++) {
+        //     for (c = 1; c <= neq+1; c++) {
+        //         cout << Yn[l][c] << " ";
+        //     }
+        //     cout << "\n";
+        // }
+        // cout << "\n" << endl;
 
     }
     for(l = 0; l<=neq; l++ ) {

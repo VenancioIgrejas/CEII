@@ -130,7 +130,13 @@ int main()
          * Verificar se alguns dos componentes e um capacitor
          * para definir uma corrente inicial.
          */
+
+
         for (int i = 0; i < numeroComponentes; i++) {
+
+          if (components->getComponents()[i]->getNome().substr(0,1) == "L"){
+            components->getComponents()[i]->setTeta(components->getTeta());
+          }
             /**
              * Verificar se existe algum componente nao linear
              */
@@ -142,6 +148,7 @@ int main()
              * e temos que definir a corrente que passa pelo capacitor
              */
             if (components->getComponents()[i]->getNome().substr(0,1) == "C") {
+                components->getComponents()[i]->setTeta(components->getTeta());
                 if (t == 0) {
                     /**
                      * Corrente para quando o instante de tempo e zero
@@ -184,7 +191,9 @@ int main()
                 /**
                  * Pega a corrente passando no resistor no instante de tempo atual
                  */
-                double correnteResistor = ((2* components->getComponents()[i]->getCapacitancia()) / components->getPasso()) * tensaoRamo;
+                double correnteResistor = ((components->getComponents()[i]->getCapacitancia()/(components->getPasso()*components->getTeta())) * tensaoRamo)
+                                        + ((1-components->getTeta())/components->getTeta())
+                                        *components->getComponents()[i]->getCorrente();
                 /**
                  * Pega a corrente no resistor e subtrai pela corrente na fonte de corrente no modelo
                  * do trapezio
