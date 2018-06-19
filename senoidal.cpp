@@ -187,20 +187,41 @@ class Senoidal : public FonteIndependente
          */
         void setValor()
         {
+            double tempoFinal;
             float amplitude;
             float senoide;
+            float valorInicial;
+            float valorFinal;
+
+            tempoFinal = (1/getFrequencia()) * getCiclos();
+
             amplitude = getAmplitude() * exp((-1 * getAmortecimento()) * (getTempo() - getAtraso()));
             senoide = sin(2 * M_PI * getFrequencia() * (getTempo() - getAtraso()) + ((M_PI/180) * getFase()));
-            valor = getNivelDC() + (amplitude * senoide);
+
+            valorInicial = getNivelDC() + (getAmplitude() * sin(M_PI * getFase() / 180));
+            valorFinal = getNivelDC() + getAmplitude()*exp(-1*getAmortecimento() * tempoFinal) *
+                                        sin(2 * M_PI * getFrequencia() * tempoFinal + ((M_PI/180) * getFase()));
+           // valor = getNivelDC() + (amplitude * senoide);
             /**
              * Desliga a fonte caso o numero de ciclos tenha sido
              * concluido
              */
+           // if (getTempo() <= getAtraso()) {
+           //     valor = getNivelDC();
+           // }
+           // if (getTempo() > (1/getFrequencia() * getCiclos()) + getAtraso()) {
+           //     valor = getNivelDC();
+           // }
+
             if (getTempo() <= getAtraso()) {
-                valor = getNivelDC();
+                valor = valorInicial;
             }
-            if (getTempo() > (1/getFrequencia() * getCiclos()) + getAtraso()) {
-                valor = getNivelDC();
+            else if (getTempo() > (tempoFinal + getAtraso())) {
+                valor = valorFinal;
+
+            }
+            else {
+                valor = getNivelDC() + (amplitude * senoide);
             }
         }
 

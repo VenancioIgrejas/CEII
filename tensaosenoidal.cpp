@@ -55,11 +55,11 @@ class TensaoSenoidal : public Senoidal
             correntes[L[pos]] += -1*getValor();
             correntes[L[0]] += getValor();
 
-            //condutancia[getNoA()][pos] += 1;
-            //condutancia[getNoB()][pos] += -1;
-            //condutancia[pos][getNoA()] += -1;
-            //condutancia[pos][getNoB()] += 1;
-            //correntes[pos] += -1*getValor();
+            // condutancia[getNoA()][pos] += 1;
+            // condutancia[getNoB()][pos] += -1;
+            // condutancia[pos][getNoA()] += -1;
+            // condutancia[pos][getNoB()] += 1;
+            // correntes[pos] += -1*getValor();
         }
 };
 

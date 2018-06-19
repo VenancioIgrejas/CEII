@@ -556,7 +556,6 @@ class Factory
                     stoi(element[4])
                 );
                 componentes.push_back(component);
-                auxNodes.push_back("j" + component->getNome());
             } else if (type == "N") {
                 ResistorNLinear *component = new ResistorNLinear( // Constroi um resistor nao linear
                     element[0],

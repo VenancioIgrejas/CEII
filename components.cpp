@@ -152,6 +152,8 @@ class Components
          */
         void virtual desestampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado) {};
 
     private:

@@ -167,7 +167,6 @@ int main()
 
         resultadoAnterior = resultado;
         resultado = gauss(condutancia, correntes, neq);
-
         /**
          * Teste de adicionar a corrente apos o calculo
          */
@@ -216,18 +215,20 @@ int main()
                         components->getComponents()[i]->getNome().substr(0,1) == "N" ||
                         components->getComponents()[i]->getNome().substr(0,1) == "D" ){
                         /*Desestampa e reestampa componentes nao lineares*/
-                        components->getComponents()[i]->desestampar(condutancia, correntes, resultadoAnterior);
+                        components->getComponents()[i]->desestampar(condutancia, correntes,L, C, resultadoAnterior);
                         components->getComponents()[i]->estampar(condutancia, correntes, nodes, L, C, resultado);
+                        std::cout << "passou aqui : " << n << '\n';
                     }
                 }
                 resultadoAnterior = resultado;
-                resultado = gauss(condutancia, correntes, components->getNodesSize());
+                resultado = gauss(condutancia, correntes, neq);//components->getNodesSize());
 
                 converge = comparar(resultadoAnterior, resultado);
                 if (converge == true) {
                     break;
                 }
             }
+            std::cout << "tempo: "<< t << '\n';
         }
 
         /**
@@ -236,9 +237,11 @@ int main()
         listaDeComponetesAnterior = components->getComponents();
 
         outfile << t;
-        for(int x = 1; x < (int) resultado.size(); x++) {
-            //outfile << " " << resultado[x];
-            outfile << "  " << resultado[x];
+        for(int x = 1; x < nos; x++) {//(int) resultado.size()+1; x++) {
+            if (C[x] !=0)
+            {
+              outfile << "  " << resultado[C[x]];
+            }//outfile << " " << resultado[x];
         }
         outfile << endl;
     }

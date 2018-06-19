@@ -95,31 +95,33 @@ class Diodo: public Components
 
     void desestampar(vector<vector<double> >& condutancia,
         vector<double>& correntes,
+        vector <int> L,
+        vector <int> C,
         vector<double> resultado)
         {
           /**
            * Pega a tensao no ramo no instante de tempo anterior
            */
-          double tensaoRamo = resultado[getNoA()] - resultado[getNoB()];
+          double tensaoRamo = resultado[C[getNoA()]] - resultado[C[getNoB()]];
           /**
            * Descarta o no Zero uma vez que ele e linearmente dependente
            */
           if (getNoA() == 0) {
-              tensaoRamo = -1*resultado[getNoB()];
+              tensaoRamo = -1*resultado[C[getNoB()]];
           }
           if (getNoB() == 0) {
-              tensaoRamo = resultado[getNoA()];
+              tensaoRamo = resultado[C[getNoA()]];
           }
 
-          condutancia[getNoA()][getNoA()] += -1/getResistencia(tensaoRamo);
-          condutancia[getNoB()][getNoB()] += -1/getResistencia(tensaoRamo);
-          condutancia[getNoA()][getNoB()] += 1/getResistencia(tensaoRamo);
-          condutancia[getNoB()][getNoA()] += 1/getResistencia(tensaoRamo);
+          condutancia[L[getNoA()]][C[getNoA()]] += -1/getResistencia(tensaoRamo);
+          condutancia[L[getNoA()]][C[getNoA()]] += -1/getResistencia(tensaoRamo);
+          condutancia[L[getNoA()]][C[getNoA()]] += 1/getResistencia(tensaoRamo);
+          condutancia[L[getNoA()]][C[getNoA()]] += 1/getResistencia(tensaoRamo);
 
           if (tensaoRamo < 0.8)
           {
-            correntes[getNoA()] += getCorrente(tensaoRamo);
-            correntes[getNoB()] += -1*getCorrente(tensaoRamo);
+            correntes[L[getNoA()]] += getCorrente(tensaoRamo);
+            correntes[L[getNoB()]] += -1*getCorrente(tensaoRamo);
           }
 
         }
