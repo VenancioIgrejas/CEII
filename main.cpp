@@ -19,6 +19,7 @@
  *  - Vector
  */
 #include <vector>
+#include <iomanip>
 /**
  * Classe parceadora de Net List
  */
@@ -50,7 +51,7 @@ int main()
 
         cout << "EEL525 - Circutos Eletricos II\n";
         cout << "UFRJ/Poli/DEL - Departamento de Engenharia Eletronica\n";
-        cout << "Desenvolvido por: Eduardo Pires, Igor Abreu e Jonas Degrave\n";
+        cout << "Desenvolvido por: Felipe Botelho, Venancio Igrejas, Renan\n";
         cout << "Programa de analise no dominio do tempo de elementos lineares e nao lineares\n";
         cout << "Nome do arquivo contendo a NetList: [ex. minha.net] ";
         cin >> fileName;
@@ -85,15 +86,32 @@ int main()
     nodes = components->getAllNodes();
     nos = nodes.size();
     int numeroComponentes = components->getComponents().size();
+    components->operacional(nos);
+    int neq = components->getNumEq();
+    vector <int> L = components->getL();
+    vector <int> C = components->getC();
+
+    int numEq = components->getNumEq();
+
+    cout << "\nVariaveis e apontadores:" << endl;
+    for (int i = 0; i < nos; i++) {
+        cout << i << " -> " << nodes[i] << " (L=" << L[i] << ", C=" << C[i] << ")" << endl;
+    }
+    cout << "TODOS OS NOS SAO: " << nos << endl;
+    cout << "O NUMERO DE NOS EH: " << ((components->getNodesSize())-1) << endl;
+    cout << "O NUMERO DE EQS EH: " << neq << endl;
 
     vector<Components*> listaDeComponetesAnterior(numeroComponentes);
-    vector<double> resultado(nos);
-    vector<double> resultadoAnterior(nos);
+    vector<double> resultado(neq+1);
+    vector<double> resultadoAnterior(neq+1);
 
     ofstream outfile ("resultados.tab");
     outfile << "t";
     for(int n = 1; n < nos; n++) {
-        outfile << " " << nodes[n];
+        if (C[n] != 0) {
+            //outfile << " " << nodes[n];
+            outfile << "  " << nodes[n];
+        }
     }
     outfile << endl;
     for (double t = components->getTempo(); t <= components->getTempoFinal() + 10e-15; t += components->getPasso()) { // 10e-15 para comparacao com double
@@ -112,7 +130,13 @@ int main()
          * Verificar se alguns dos componentes e um capacitor
          * para definir uma corrente inicial.
          */
+
+
         for (int i = 0; i < numeroComponentes; i++) {
+
+          if (components->getComponents()[i]->getNome().substr(0,1) == "L"){
+            components->getComponents()[i]->setTeta(components->getTeta());
+          }
             /**
              * Verificar se existe algum componente nao linear
              */
@@ -124,6 +148,7 @@ int main()
              * e temos que definir a corrente que passa pelo capacitor
              */
             if (components->getComponents()[i]->getNome().substr(0,1) == "C") {
+                components->getComponents()[i]->setTeta(components->getTeta());
                 if (t == 0) {
                     /**
                      * Corrente para quando o instante de tempo e zero
@@ -137,10 +162,11 @@ int main()
                     components->getComponents()[i]->setCorrente(listaDeComponetesAnterior[i]->getCorrente());
                 }
             }
-            components->getComponents()[i]->estampar(condutancia, correntes, nodes, resultado);
+            components->getComponents()[i]->estampar(condutancia, correntes, nodes, L, C, resultado);
         }
+
         resultadoAnterior = resultado;
-        resultado = gauss(condutancia, correntes, components->getNodesSize());
+        resultado = gauss(condutancia, correntes, neq);
 
         /**
          * Teste de adicionar a corrente apos o calculo
@@ -152,27 +178,27 @@ int main()
                 /**
                  * Pega a tensao nodal para a matriz de resultados atuais e estampas atuais
                  */
-                double tensaoRamo = resultado[noA] - resultado[noB];
+                double tensaoRamo = resultado[C[noA]] - resultado[C[noB]];
                 /**
                  * Ignorar a tensao no no 0
                  */
                 if (noA == 0) {
-                    tensaoRamo = -1*resultado[noB];
+                    tensaoRamo = -1*resultado[C[noB]];
                 }
                 if (noB == 0) {
-                    tensaoRamo = resultado[noA];
+                    tensaoRamo = resultado[C[noA]];
                 }
                 /**
                  * Pega a corrente passando no resistor no instante de tempo atual
                  */
-                double correnteResistor = ((2* components->getComponents()[i]->getCapacitancia()) / components->getPasso()) * tensaoRamo;
+                double correnteResistor = ((components->getComponents()[i]->getCapacitancia())/(components->getPasso()*components->getTeta()))*tensaoRamo;;
                 /**
                  * Pega a corrente no resistor e subtrai pela corrente na fonte de corrente no modelo
                  * do trapezio
                  */
                 components->getComponents()[i]->setCorrente(
                     correnteResistor -
-                    components->getComponents()[i]->getCorrente()
+                    (((1-components->getTeta())/components->getTeta()) * components->getComponents()[i]->getCorrente())
                 );
             }
         }
@@ -182,19 +208,31 @@ int main()
          */
         if (linear == false) {
             bool converge = false;
-            for (int n = 1; n <= 20; n++) {
+            for (int n = 1; n <= 50; n++) {
+                //cout << "\nEsteve aki: " << n << endl;
                 for (int i = 0; i < numeroComponentes; i++) {
                     if (components->getComponents()[i]->getNome().substr(0,1) == "$" ||
-                        components->getComponents()[i]->getNome().substr(0,1) == "N") {
-                        /*Desestampa e reestampa componentes nao lineares*/
-                        components->getComponents()[i]->desestampar(condutancia, correntes, resultadoAnterior);
-                        components->getComponents()[i]->estampar(condutancia, correntes, nodes, resultado);
+                        components->getComponents()[i]->getNome().substr(0,1) == "N" ||
+                        components->getComponents()[i]->getNome().substr(0,1) == "D" ){
+
+                        converge = comparar(resultadoAnterior, resultado);
+
+                        /*Desestampa e reestampa componentes nao lineares se nao convergiu*/
+                        if (!converge) {
+                           components->getComponents()[i]->desestampar(condutancia, correntes,L, C, resultadoAnterior);
+                           components->getComponents()[i]->estampar(condutancia, correntes, nodes, L, C, resultado);
+                        }
+
                     }
                 }
-                resultadoAnterior = resultado;
-                resultado = gauss(condutancia, correntes, components->getNodesSize());
+                if (!converge) {
+                   resultadoAnterior = resultado;
+                   resultado = gauss(condutancia, correntes, neq);//components->getNodesSize());
+                }
 
                 converge = comparar(resultadoAnterior, resultado);
+                cout << "\nAKI: " << n << "  Foi: " << converge << "Em t = " << t << endl;
+
                 if (converge == true) {
                     break;
                 }
@@ -207,8 +245,11 @@ int main()
         listaDeComponetesAnterior = components->getComponents();
 
         outfile << t;
-        for(int x = 1; x < (int) resultado.size(); x++) {
-            outfile << " " << resultado[x];
+        for(int x = 1; x < nos; x++) {//(int) resultado.size()+1; x++) {
+            if (C[x] !=0)
+            {
+              outfile << "  " << resultado[C[x]];
+            }//outfile << " " << resultado[x];
         }
         outfile << endl;
     }

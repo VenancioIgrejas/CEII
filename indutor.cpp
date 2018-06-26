@@ -46,12 +46,28 @@ class Indutor : public Components
         }
 
         /**
+        * define o valor do teta
+        */
+
+        void setTeta(double t)
+        {
+          if (t==0){teta = 0.0001;}
+          else{teta = t;}
+
+        }
+
+        /**
          * Retorna a corrente do indutor
          */
         double getCorrente()
         {
 
             return corrente;
+        }
+
+        double getTeta()
+        {
+          return teta;
         }
 
         /**
@@ -89,16 +105,18 @@ class Indutor : public Components
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
             vector<string>::iterator it;
             it = find(nodes.begin(), nodes.end(), getAuxNode());
             auto pos = it - nodes.begin();
 
-            condutancia[getNoA()][pos] += 1;
-            condutancia[getNoB()][pos] += -1;
-            condutancia[pos][getNoA()] += -1;
-            condutancia[pos][getNoB()] += 1;
+            condutancia[L[getNoA()]][C[pos]] += 1;
+            condutancia[L[getNoB()]][C[pos]] += -1;
+            condutancia[L[pos]][C[getNoA()]] += -1;
+            condutancia[L[pos]][C[getNoB()]] += 1;
 
             /**
              * Valores que sao variaves no instante de tempo inicial e no
@@ -108,26 +126,30 @@ class Indutor : public Components
                 /**
                  * Tensao no instante de tempo anterior
                  */
-                double tensaoRamo = resultado[getNoA()] - resultado[getNoB()];
+                double tensaoRamo = resultado[C[getNoA()]] - resultado[C[getNoB()]];
                 /**
                  * Descarta o no Zero uma vez que ele e linearmente dependente
                  */
                 if (getNoA() == 0) {
-                    tensaoRamo = -1*resultado[getNoB()];
+                    tensaoRamo = -1*resultado[C[getNoB()]];
                 }
                 if (getNoB() == 0) {
-                    tensaoRamo = resultado[getNoA()];
+                    tensaoRamo = resultado[C[getNoA()]];
                 }
 
-                corrente = resultado[pos];
+                corrente = resultado[C[pos]];
 
-                condutancia[pos][pos] += (2 * getIndutancia()) / passo;
-                correntes[pos] += (((2 * getIndutancia()) / passo) * corrente) + tensaoRamo;
+                condutancia[L[pos]][C[pos]] += getIndutancia() / (getTeta()*passo);
+                correntes[L[pos]] += (( getIndutancia() / (passo*getTeta())) * corrente) + (1/getTeta()-1)*tensaoRamo;
             } else {
-                condutancia[getNoA()][getNoA()] += 10e9;
-                condutancia[getNoB()][getNoB()] += 10e9;
-                condutancia[getNoA()][getNoB()] += -10e9;
-                condutancia[getNoB()][getNoA()] += -10e9;
+                /**
+                 * Em t = 0, indutor como resistencia de 10e-9 ohms
+                 */
+                condutancia[L[pos]][C[pos]] += 10e-9;
+                //condutancia[L[getNoA()]][C[getNoA()]] += 10e9;
+                //condutancia[L[getNoB()]][C[getNoB()]] += 10e9;
+                //condutancia[L[getNoA()]][C[getNoB()]] += -10e9;
+                //condutancia[L[getNoB()]][C[getNoA()]] += -10e9;
             }
         }
 
@@ -146,6 +168,11 @@ class Indutor : public Components
          * valor da indutancia do capacitor
          */
         double indutancia;
+
+        /**
+        * valor do teta para analise
+        */
+        double teta;
 };
 
 #endif

@@ -55,20 +55,22 @@ class Transformador : public Components4t
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
             vector<string>::iterator it;
             it = find(nodes.begin(), nodes.end(), getAuxNode());
             auto pos = it - nodes.begin();
 
-            condutancia[getNoA()][pos] += -1*getN();
-            condutancia[getNoB()][pos] += getN();
-            condutancia[getNoC()][pos] += 1;
-            condutancia[getNoD()][pos] += -1;
-            condutancia[pos][getNoA()] += getN();
-            condutancia[pos][getNoB()] += -1*getN();
-            condutancia[pos][getNoC()] += -1;
-            condutancia[pos][getNoD()] += 1;
+            condutancia[L[getNoA()]][C[pos]] += -1*getN();
+            condutancia[L[getNoB()]][C[pos]] += getN();
+            condutancia[L[getNoC()]][C[pos]] += 1;
+            condutancia[L[getNoD()]][C[pos]] += -1;
+            condutancia[L[pos]][C[getNoA()]] += getN();
+            condutancia[L[pos]][C[getNoB()]] += -1*getN();
+            condutancia[L[pos]][C[getNoC()]] += -1;
+            condutancia[L[pos]][C[getNoD()]] += 1;
         }
 
     private:

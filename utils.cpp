@@ -25,6 +25,8 @@
  */
 #include <algorithm>
 
+#define TOLG 1e-9
+
 /* Necessario para nao precisar escrever std:: */
 using namespace std;
 
@@ -53,67 +55,75 @@ const vector<string> explode(const string& phrase, char delim)
  * e a matriz de corrente, aplica a eliminacao de gauss para transformar a matriz
  * de condutividade em uma matriz identidade.
  */
-vector<double> gauss(vector<vector<double> > condutancia, vector<double> correntes, int nos)
+vector<double> gauss(vector<vector<double> > condutancia, vector<double> correntes, int neq)
 {
-    int condutanciaRows = condutancia.size();
-    int correnteRows = correntes.size();
-
-    /**
-     * Matrizes de condutancia e conrrente devem ter os
-     * mesmos numeros de linhas
-     */
-    if (condutanciaRows != correnteRows) {
-        throw invalid_argument("Matrizes de condutancia e corrente nao tem o msm tamanho");
+    vector<vector<double>> Yn(neq+1, vector<double>(neq+2));
+    vector<double> resultado(neq+1);
+    int c = 0;
+    for (int l = 0; l <= neq; l++) {
+        for (c = 0; c <= neq; c++) {
+            Yn[l][c] = condutancia[l][c];
+        }
+        Yn[l][c] = correntes[l];
     }
-    /**
-     * Analisa cada linha da matriz de conduntancias
-     */
-    for(int row = 1; row < condutanciaRows; row++) {
-        double maxValue = 0;
-        int maxIndex = 0;
+    int i,j,l, a;
+    double t, p;
 
-        for (int linha = 1; linha < condutanciaRows; linha++) {
-            if (fabs(condutancia[linha][row]) > maxValue && linha >= row) {
-                maxValue = fabs(condutancia[linha][row]);
-                maxIndex = linha;
+     /*cout << "\nA MATRIZ NO INICIO EH: " << endl;
+     for (int l = 1; l <= neq; l++) {
+         for (c = 1; c <= neq+1; c++) {
+             cout << Yn[l][c] << " ";
+         }
+         cout << "\n";
+     }
+     cout << "\n" << endl;*/
+
+    for (i=1; i<=neq; i++) {
+        t=0.0;
+        a=i;
+        for (l=i; l<=neq; l++) {
+            if (fabs(Yn[l][i])>fabs(t)) {
+                a=l;
+                t=Yn[l][i];
+
             }
         }
-        /**
-         * Troca as linhas de condutancia e corrente de acordo
-         * com o valor maximo
-         */
-        swap(condutancia[row], condutancia[maxIndex]);
-        swap(correntes[row], correntes[maxIndex]);
-
-        double pivot = condutancia[row][row];
-        if (pivot == 0) {
-            throw invalid_argument("Matrizes Singular");
-        }
-
-        int column = condutancia[row].size();
-        if (condutanciaRows != column) {
-            throw invalid_argument("Matrizes de condutancia deve ser quadrada");
-        }
-
-        correntes[row] /= pivot;
-        for(int col = 1; col < column; col++) {
-            condutancia[row][col] /= pivot;
-        }
-        /**
-         * Transforma a matriz de condutancia em uma identidade
-         */
-        for(int r = 1; r < condutanciaRows; r++) {
-            if (r != row) {
-                double fator = condutancia[r][row];
-                correntes[r] -= correntes[row] * fator;
-                for(int c = 1; c < column; c++) {
-                    condutancia[r][c] -= condutancia[row][c] * fator;
-                }
+        if (i!=a) {
+            for (l=1; l<=neq+1; l++) {
+                p=Yn[i][l];
+                Yn[i][l]=Yn[a][l];
+                Yn[a][l]=p;
             }
         }
-    }
 
-    return correntes;
+
+        if (fabs(t)<TOLG) {
+            throw invalid_argument("Sistema Singular");
+        }
+        for (j=neq+1; j>0; j--) {  /* Basta j>i em vez de j>0 */
+            Yn[i][j] /= t;
+            p=Yn[i][j];
+            if (p!=0)
+            for (l=1; l<=neq; l++) {
+                if (l!=i)
+                    Yn[l][j]-=Yn[l][i]*p;
+            }
+        }
+
+        /* cout << "\nA MATRIZ NO FIM EH: " << endl;
+         for (int l = 1; l <= neq; l++) {
+             for (c = 1; c <= neq+1; c++) {
+                 cout << Yn[l][c] << " ";
+             }
+             cout << "\n";
+         }
+         cout << "\n" << endl;*/
+
+    }
+    for(l = 0; l<=neq; l++ ) {
+        resultado[l] = Yn[l][neq+1];
+    }
+   return resultado;
 }
 
 /**
@@ -124,8 +134,10 @@ vector<double> gauss(vector<vector<double> > condutancia, vector<double> corrent
  */
 bool comparar(vector<double> vetor1, vector<double> vetor2)
 {
+    double x = 1;//10e-2;
+    double erro;
     int nosIguais = 0;
-    double limite = 10e-5; //Esse limete pode ser modificado para aumentar a exatidao da comparacao
+    double limite = 10e-10; //Esse limete pode ser modificado para aumentar a exatidao da comparacao
     int sizeOne = vetor1.size();
     int sizeTwo = vetor2.size();
 
@@ -134,11 +146,22 @@ bool comparar(vector<double> vetor1, vector<double> vetor2)
     }
 
     for(int i = 0; i < sizeOne; i++) {
-        double lLimit = fabs(vetor1[i]) - (fabs(vetor1[i]) * limite);
-        double uLimit = fabs(vetor1[i]) + (fabs(vetor1[i]) * limite);
-        if (fabs(vetor2[i]) <= uLimit && fabs(vetor2[i]) >= lLimit) {
-            nosIguais++;
-        }
+
+      if (fabs(vetor2[i]) > x)
+      {
+        erro = x*(fabs((vetor2[i]-vetor1[i])/vetor2[i]));
+      }else{
+        erro = fabs(vetor2[i] - vetor1[i]);
+      }
+
+      if (erro < limite){
+        nosIguais++;
+      }
+        // double lLimit = fabs(vetor1[i]) - (fabs(vetor1[i]) * limite);
+        // double uLimit = fabs(vetor1[i]) + (fabs(vetor1[i]) * limite);
+        // if (fabs(vetor2[i]) <= uLimit && fabs(vetor2[i]) >= lLimit) {
+        //     nosIguais++;
+        // }
     }
     if (nosIguais == sizeOne) {
         return true;

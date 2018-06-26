@@ -1,6 +1,9 @@
 #ifndef COMPONENTS
 #define COMPONENTS
 
+#include <string>
+#include <vector>
+
 /* Necessario para nao precisar escrever std:: */
 using namespace std;
 
@@ -98,11 +101,19 @@ class Components
          */
         int virtual getNoC() {return 0;};
         int virtual getNoD() {return 0;};
+
+        /**
+         *Metodos virtuais necessarios parar ter o no auxiliar
+         */
+         string virtual getAuxNode() {return "0";};
+         string virtual getAuxNode2() {return "0";};
+
         /**
          * Necessario para pegar as correntes no capacitor, caso contrario
          * o metodo nao pode ser utilizado no vetor de componentes
          */
         void virtual setCorrente(double v) {};
+        void virtual setTeta(double t) {};
         double virtual getCorrente() {return 0;};
         double virtual getCapacitancia() {return 0;};
 
@@ -130,6 +141,8 @@ class Components
         void virtual estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado) = 0;
 
         /**
@@ -139,6 +152,8 @@ class Components
          */
         void virtual desestampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado) {};
 
     private:

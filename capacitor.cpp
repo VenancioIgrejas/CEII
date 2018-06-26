@@ -28,6 +28,12 @@ class Capacitor : public Components
             passo = p;
         }
 
+        void setTeta(double t)
+        {
+          if (t==0){teta = 0.0001;}
+          else{teta = t;}
+        }
+
         /**
          * Retorna a corrente do  capacitor
          */
@@ -51,6 +57,11 @@ class Capacitor : public Components
         double getCorrente()
         {
             return corrente;
+        }
+
+        double getTeta()
+        {
+          return teta;
         }
 
         /**
@@ -79,6 +90,8 @@ class Capacitor : public Components
         void estampar(vector<vector<double> >& condutancia,
             vector<double>& correntes,
             vector<string> nodes,
+            vector<int> L,
+            vector<int> C,
             vector<double> resultado)
         {
                 /**
@@ -90,35 +103,38 @@ class Capacitor : public Components
                 /**
                  * Pega a tensao no ramo no instante de tempo anterior
                  */
-                double tensaoRamo = resultado[getNoA()] - resultado[getNoB()];
+                double tensaoRamo = resultado[C[getNoA()]] - resultado[C[getNoB()]];
                 /**
                  * Descarta o no Zero uma vez que ele e linearmente dependente
                  */
                 if (getNoA() == 0) {
-                    tensaoRamo = -1*resultado[getNoB()];
+                    tensaoRamo = -1*resultado[C[getNoB()]];
                 }
                 if (getNoB() == 0) {
-                    tensaoRamo = resultado[getNoA()];
+                    tensaoRamo = resultado[C[getNoA()]];
                 }
 
-                condutancia[getNoA()][getNoA()] += (2 * getCapacitancia())/passo;
-                condutancia[getNoB()][getNoB()] += (2 * getCapacitancia())/passo;
-                condutancia[getNoA()][getNoB()] += (-2 * getCapacitancia())/passo;
-                condutancia[getNoB()][getNoA()] += (-2 * getCapacitancia())/passo;
+                condutancia[L[getNoA()]][C[getNoA()]] += getCapacitancia()/(passo*getTeta());
+                condutancia[L[getNoB()]][C[getNoB()]] += getCapacitancia()/(passo*getTeta());
+                condutancia[L[getNoA()]][C[getNoB()]] += (-1 * getCapacitancia())/(passo*getTeta());
+                condutancia[L[getNoB()]][C[getNoA()]] += (-1 * getCapacitancia())/(passo*getTeta());
 
-                correntes[getNoA()] += (((2 * getCapacitancia())/passo) * tensaoRamo) + getCorrente(); /*getCorrente vale j no instante anterior*/
-                correntes[getNoB()] += (((-2 * getCapacitancia())/passo) * tensaoRamo) - getCorrente(); /*getCorrente vale j no instante anterior*/
+                correntes[L[getNoA()]] += ((getCapacitancia()/(passo*getTeta())) * tensaoRamo) + ((1-getTeta())/getTeta())*getCorrente(); /*getCorrente vale j no instante anterior*/
+                correntes[L[getNoB()]] += (((-1*getCapacitancia())/(passo*getTeta())) * tensaoRamo) - ((1-getTeta())/getTeta())*getCorrente();; /*getCorrente vale j no instante anterior*/
                 /**
                  * Define a nova corrente usando tensao no instante e a corrente no instante anterior
                  * esse nova corrente agora passa a ser a corrente na fonte de corrente para o instante
                  * atual
                  */
-                setCorrente((((2 * getCapacitancia())/passo) * tensaoRamo) + getCorrente());
+                setCorrente(((getCapacitancia()/(passo*getTeta())) * tensaoRamo) + ((1-getTeta())/getTeta())*getCorrente());
             } else {
-                condutancia[getNoA()][getNoA()] += 10e-9;
-                condutancia[getNoB()][getNoB()] += 10e-9;
-                condutancia[getNoA()][getNoB()] += -10e-9;
-                condutancia[getNoB()][getNoA()] += -10e-9;
+                /**
+                 * Em t = 0, capacitor como resistencia de 10e9 ohms
+                 */
+                condutancia[L[getNoA()]][C[getNoA()]] += 10e-9;
+                condutancia[L[getNoB()]][C[getNoB()]] += 10e-9;
+                condutancia[L[getNoA()]][C[getNoB()]] += -10e-9;
+                condutancia[L[getNoB()]][C[getNoA()]] += -10e-9;
             }
 
         }
@@ -138,6 +154,8 @@ class Capacitor : public Components
          * valor da capacitancia do capacitor
          */
         double capacitancia;
+
+        double teta;
 };
 
 #endif
